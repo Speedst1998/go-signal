@@ -18,9 +18,11 @@ import (
 func main() {
 	// Declare a new router
 	var r = src.NewServer()
+    // http.ListenAndServe(":8080", nil)
 	log.Printf("Server stopped, err: %v", http.ListenAndServe(":8050", r))
 	// http.ListenAndServe(":8080", r)
 	// r.Run(":8072")
+
 }
 
 // "handler" is our handler function. It has to follow the function signature of a ResponseWriter and Request type

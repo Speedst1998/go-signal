@@ -8,14 +8,18 @@ import (
 	"example.com/accounting/src/routes"
 	"example.com/accounting/src/services"
 	"example.com/accounting/src/services/auth"
+	"github.com/gorilla/websocket"
 )
 
 func NewServer() *gin.Engine {
 
+
+	mediaServerSockets := make(map[string]*websocket.Conn) 
+	
 	router := gin.New()
 	DB := db.MakeDB()
 	service := services.MakeService(DB)
-	controller := routes.Controller{Service: service}
+	controller := routes.Controller{Service: service, MediaServerSockets: mediaServerSockets}
 	// var envVars = utils.GetEnvVars()
 
 	// if envVars.DebugMode {
@@ -42,8 +46,11 @@ func NewServer() *gin.Engine {
 			news.POST("/signup", controllers.SignUp)
 			news.POST("/login", controllers.Login)
 			news.GET("/getUser/:email", Auth(), controllers.GetUser)
+			news.GET("websocket", controller.ConnectWebSocket)
+			// news.GET("webRTCConnect")
 		}
 	}
+	// description string, mediaServerName
 
 	return router
 }

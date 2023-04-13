@@ -3,12 +3,9 @@ package db
 import (
 	"context"
 	"log"
-	"os"
 
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"example.com/accounting/src/db/dao"
 )
@@ -26,18 +23,18 @@ type CreateUser struct {
 func MakeDB() DB {
 
 	ctx := context.TODO()
-	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found")
-	}
-	uri := os.Getenv("MONGODB_URI")
-	if uri == "" {
-		log.Fatal("You must set your 'MONGODB_URI' environmental variable. See\n\t https://docs.mongodb.com/drivers/go/current/usage-examples/#environment-variable")
-	}
-	serverAPIOptions := options.ServerAPI(options.ServerAPIVersion1)
-	clientOptions := options.Client().
-		ApplyURI(uri).
-		SetServerAPIOptions(serverAPIOptions)
-	client, err := mongo.Connect(ctx, clientOptions)
+	// if err := godotenv.Load(); err != nil {
+	// 	log.Println("No .env file found")
+	// }
+	// uri := os.Getenv("MONGODB_URI")
+	// if uri == "" {
+	// 	log.Fatal("You must set your 'MONGODB_URI' environmental variable. See\n\t https://docs.mongodb.com/drivers/go/current/usage-examples/#environment-variable")
+	// }
+	// serverAPIOptions := options.ServerAPI(options.ServerAPIVersion1)
+	// clientOptions := options.Client().
+	// 	ApplyURI(uri).
+	// 	SetServerAPIOptions(serverAPIOptions)
+	client, err := mongo.Connect(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}

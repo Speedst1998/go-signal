@@ -7,12 +7,14 @@ import (
 
 	"example.com/accounting/src/routes/validators"
 	"example.com/accounting/src/services"
+	"github.com/gorilla/websocket"
 )
 
 // NewsController <controller>
 // is used for describing controller actions for news.
 type Controller struct {
 	Service services.Service
+	MediaServerSockets map[string]*websocket.Conn
 }
 
 // Get <function>
@@ -67,6 +69,22 @@ func (nc Controller) SignUp(c *gin.Context) {
 // is used to handle get action of news controller which will return all news types.
 // url: /v1/news/types
 func (nc Controller) GetUser(c *gin.Context) {
+	email := c.Param("email")
+	user, err := nc.Service.GetUser(email)
+
+	if err != nil {
+		c.JSON(404, "hi")
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"method":  user,
+		"message": "Hello from GetSources function!",
+	})
+}
+
+func (nc Controller) ConnectWebSocket(c *gin.Context) {
+	services.WebSocketHandler(c, MediaServerSockets)
 	email := c.Param("email")
 	user, err := nc.Service.GetUser(email)
 
