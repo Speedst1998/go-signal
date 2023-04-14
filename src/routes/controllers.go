@@ -84,17 +84,29 @@ func (nc Controller) GetUser(c *gin.Context) {
 }
 
 func (nc Controller) ConnectWebSocket(c *gin.Context) {
-	services.WebSocketHandler(c, MediaServerSockets)
-	email := c.Param("email")
-	user, err := nc.Service.GetUser(email)
+	mediaServerName := c.Param("mediaServerName")
+	services.WebSocketHandler(c, nc.MediaServerSockets, mediaServerName)
+}
+
+func (nc Controller) ClientConnect(c *gin.Context) {
+	mediaServerName := c.Param("mediaServerName")
+	clientConnectParams := validators.ClientConnectParam{}
+	err := c.BindJSON(&clientConnectParams)
 
 	if err != nil {
 		c.JSON(404, "hi")
 		return
 	}
 
+	answer, err := services.ClientConnect(c, nc.MediaServerSockets, mediaServerName, clientConnectParams.Description)
+	println("done answer")
+	println(answer)
+	if err != nil {
+		c.JSON(404, "Could Not find given Media Server")
+		return
+	}
+
 	c.JSON(200, gin.H{
-		"method":  user,
-		"message": "Hello from GetSources function!",
+		"answer": answer,
 	})
 }

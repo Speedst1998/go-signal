@@ -10,3 +10,7 @@ type LoginParam struct {
 	Email string `json:"email" binding:"required,email"`
 	Pass  string `json:"pass" binding:"required"`
 }
+
+type ClientConnectParam struct {
+	Description string
+}

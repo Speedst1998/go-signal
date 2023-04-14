@@ -38,16 +38,24 @@ func NewServer() *gin.Engine {
 	// static files serving
 	router.Static("/images", "./images")
 
-	v1 := router.Group("v1")
+	auth := router.Group("auth")
 	{
-		news := v1.Group("auth")
+		v1 := auth.Group("v1")
 		{
 			controllers := controller
-			news.POST("/signup", controllers.SignUp)
-			news.POST("/login", controllers.Login)
-			news.GET("/getUser/:email", Auth(), controllers.GetUser)
-			news.GET("websocket", controller.ConnectWebSocket)
+			v1.POST("/signup", controllers.SignUp)
+			v1.POST("/login", controllers.Login)
+			v1.GET("/getUser/:email", Auth(), controllers.GetUser)
+			
 			// news.GET("webRTCConnect")
+		}
+	}
+	connect := router.Group("connect")
+	{
+		v1 := connect.Group("v1")
+		{
+			v1.GET("mediaServer/:mediaServerName", controller.ConnectWebSocket)
+			v1.POST("client/:mediaServerName", controller.ClientConnect)
 		}
 	}
 	// description string, mediaServerName
