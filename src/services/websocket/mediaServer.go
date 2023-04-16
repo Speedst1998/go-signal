@@ -1,6 +1,6 @@
 package websocket
 
-type mediaServer struct {
+type MediaServer struct {
 	connection Socket
 	name       string
 }

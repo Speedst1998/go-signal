@@ -17,3 +17,7 @@ func (q Queue) dequeue() chan string {
 func (q Queue) isEmpty() bool {
 	return len(q.list) == 0
 }
+
+func (q Queue) size() int {
+	return len(q.list)
+}
