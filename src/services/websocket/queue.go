@@ -5,12 +5,15 @@ type Queue struct {
 }
 
 type Result struct {
-	value string
-	err   error
+	Value string
+	Err   error
 }
 
 func (q Queue) enqueue(channel chan Result) {
+	println(q.list)
 	q.list = append(q.list, channel)
+	println(q.list)
+	println(len(q.list))
 }
 
 func (q Queue) dequeue() chan Result {

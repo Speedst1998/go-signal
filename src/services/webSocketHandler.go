@@ -2,8 +2,8 @@ package services
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -12,42 +12,49 @@ import (
 )
 
 var upgrader = websocket.Upgrader{
-    ReadBufferSize:  1024,
-    WriteBufferSize: 1024,
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
 }
 
-func WebSocketHandler(c *gin.Context, MediaServerSockets map[string]localWebsocket.MediaServer, mediaServerName string)  {
-    // Upgrade the HTTP connection to a WebSocket connection
-    conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
-    if err != nil {
-        http.Error(c.Writer, "Failed to upgrade to WebSocket", http.StatusBadRequest)
-        return
-    }
-
-    MediaServerSockets[mediaServerName] = localWebsocket.MediaServer{Connection: conn, Name: mediaServerName}
-    // Loop to read messages from the WebSocket connection
-    // for {
-    //     _, message, err := conn.ReadMessage()
-    //     if err != nil {
-    //         break
-    //     }
-    //     // Handle the incoming message
-    //     fmt.Printf("Received message: %s\n", message)
-    // }
+func WebSocketHandler(c *gin.Context, mediaServerSockets map[string]localWebsocket.MediaServer, mediaServerName string) {
+	// Upgrade the HTTP connection to a WebSocket connection
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		http.Error(c.Writer, "Failed to upgrade to WebSocket", http.StatusBadRequest)
+		return
+	}
+	queueHandler := localWebsocket.MakeConnectionQueueHandler(conn, mediaServerName)
+	mediaServerSockets[mediaServerName] = localWebsocket.MediaServer{QueueHandler: queueHandler, Name: mediaServerName}
+	// Loop to read messages from the WebSocket connection
+	// for {
+	//     _, message, err := conn.ReadMessage()
+	//     if err != nil {
+	//         break
+	//     }
+	//     // Handle the incoming message
+	//     fmt.Printf("Received message: %s\n", message)
+	// }
 }
 
-func ClientConnect(c *gin.Context, MediaServerSockets map[string]localWebsocket.MediaServer, mediaServerName string, description string) (string, error)  {
+func ClientConnect(c *gin.Context, MediaServerSockets map[string]localWebsocket.MediaServer, mediaServerName string, description string) (string, error) {
 
-    println("in clineconnect")
-    mediaServer, ok := MediaServerSockets[mediaServerName]
+	println("Connecting Client")
+	mediaServer, ok := MediaServerSockets[mediaServerName]
+	println(mediaServer.Name)
 
-    if ok {
-        mediaServer.Connection.WriteMessage(websocket.TextMessage, []byte(description))
-        println("WHATIS THE ERROR")
-
-        _, message, _ := mediaServer.Connection.ReadMessage()
-        fmt.Printf("Received message: %s\n", message)
-        return string(message), nil
-    }
-    return "", errors.New("couldnt find media server")
+	if ok {
+		channel := make(chan localWebsocket.Result, 1)
+		println(len(channel))
+		println(cap(channel))
+		println("Enqueuing channel")
+		mediaServer.QueueHandler.Enqueue(channel)
+		println("Sending result to channel")
+		channel <- localWebsocket.Result{Value: description, Err: nil}
+		time.Sleep(time.Second)
+		println("Waiting for channel response")
+		result := <-channel
+		println("Got response : ", result.Value)
+		return result.Value, result.Err
+	}
+	return "", errors.New("couldnt find media server")
 }
