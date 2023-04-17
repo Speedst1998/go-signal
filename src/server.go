@@ -8,13 +8,13 @@ import (
 	"example.com/accounting/src/routes"
 	"example.com/accounting/src/services"
 	"example.com/accounting/src/services/auth"
-	"github.com/gorilla/websocket"
+	"example.com/accounting/src/services/websocket"
 )
 
 func NewServer() *gin.Engine {
 
 
-	mediaServerSockets := make(map[string]*websocket.Conn) 
+	mediaServerSockets := make(map[string]websocket.MediaServer) 
 	
 	router := gin.New()
 	DB := db.MakeDB()

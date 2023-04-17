@@ -7,14 +7,14 @@ import (
 
 	"example.com/accounting/src/routes/validators"
 	"example.com/accounting/src/services"
-	"github.com/gorilla/websocket"
+	"example.com/accounting/src/services/websocket"
 )
 
 // NewsController <controller>
 // is used for describing controller actions for news.
 type Controller struct {
 	Service services.Service
-	MediaServerSockets map[string]*websocket.Conn
+	MediaServerSockets map[string]websocket.MediaServer
 }
 
 // Get <function>

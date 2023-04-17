@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	localWebsocket "example.com/accounting/src/services/websocket"
 	"github.com/gorilla/websocket"
 )
 
@@ -15,7 +16,7 @@ var upgrader = websocket.Upgrader{
     WriteBufferSize: 1024,
 }
 
-func WebSocketHandler(c *gin.Context, MediaServerSockets map[string]*websocket.Conn, mediaServerName string)  {
+func WebSocketHandler(c *gin.Context, MediaServerSockets map[string]localWebsocket.MediaServer, mediaServerName string)  {
     // Upgrade the HTTP connection to a WebSocket connection
     conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
     if err != nil {
@@ -23,7 +24,7 @@ func WebSocketHandler(c *gin.Context, MediaServerSockets map[string]*websocket.C
         return
     }
 
-    MediaServerSockets[mediaServerName] = conn
+    MediaServerSockets[mediaServerName] = localWebsocket.MediaServer{Connection: conn, Name: mediaServerName}
     // Loop to read messages from the WebSocket connection
     // for {
     //     _, message, err := conn.ReadMessage()
@@ -35,16 +36,16 @@ func WebSocketHandler(c *gin.Context, MediaServerSockets map[string]*websocket.C
     // }
 }
 
-func ClientConnect(c *gin.Context, MediaServerSockets map[string]*websocket.Conn, mediaServerName string, description string) (string, error)  {
+func ClientConnect(c *gin.Context, MediaServerSockets map[string]localWebsocket.MediaServer, mediaServerName string, description string) (string, error)  {
 
     println("in clineconnect")
-    socket, ok := MediaServerSockets[mediaServerName]
-    println(socket)
+    mediaServer, ok := MediaServerSockets[mediaServerName]
+
     if ok {
-        socket.WriteMessage(websocket.TextMessage, []byte(description))
+        mediaServer.Connection.WriteMessage(websocket.TextMessage, []byte(description))
         println("WHATIS THE ERROR")
 
-        _, message, _ := socket.ReadMessage()
+        _, message, _ := mediaServer.Connection.ReadMessage()
         fmt.Printf("Received message: %s\n", message)
         return string(message), nil
     }
