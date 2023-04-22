@@ -17,6 +17,12 @@ type Controller struct {
 	MediaServerSockets map[string]websocket.MediaServer
 }
 
+func (nc Controller) Default(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"hello": "service running",
+	})
+}
+
 // Get <function>
 // is used to handle get action of news controller which will return <count> number of news.
 // url: /v1/news?count=80 , by default <count> = 50

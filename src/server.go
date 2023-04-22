@@ -13,9 +13,8 @@ import (
 
 func NewServer() *gin.Engine {
 
+	mediaServerSockets := make(map[string]websocket.MediaServer)
 
-	mediaServerSockets := make(map[string]websocket.MediaServer) 
-	
 	router := gin.New()
 	DB := db.MakeDB()
 	service := services.MakeService(DB)
@@ -38,6 +37,8 @@ func NewServer() *gin.Engine {
 	// static files serving
 	router.Static("/images", "./images")
 
+	router.GET("/", controller.Default)
+
 	auth := router.Group("auth")
 	{
 		v1 := auth.Group("v1")
@@ -46,7 +47,7 @@ func NewServer() *gin.Engine {
 			v1.POST("/signup", controllers.SignUp)
 			v1.POST("/login", controllers.Login)
 			v1.GET("/getUser/:email", Auth(), controllers.GetUser)
-			
+
 			// news.GET("webRTCConnect")
 		}
 	}
