@@ -3,7 +3,6 @@ package services
 import (
 	"errors"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -47,14 +46,12 @@ func ClientConnect(c *gin.Context, MediaServerSockets map[string]localWebsocket.
 		println(len(channel))
 		println(cap(channel))
 		println("Enqueuing channel")
-		mediaServer.QueueHandler.Enqueue(channel)
+		mediaServer.QueueHandler.Enqueue(channel, description)
 		println("Sending result to channel")
-		channel <- localWebsocket.Result{Value: description, Err: nil}
-		time.Sleep(time.Second)
 		println("Waiting for channel response")
 		result := <-channel
-		println("Got response : ", result.Value)
-		return result.Value, result.Err
+		println("Got response : ", result.Answer)
+		return result.Answer, result.Err
 	}
 	return "", errors.New("couldnt find media server")
 }

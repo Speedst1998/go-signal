@@ -1,25 +1,30 @@
 package websocket
 
 type Queue struct {
-	list []chan Result
+	list []DescriptionRequest
+}
+
+type DescriptionRequest struct {
+	ResultChannel chan Result
+	Description   string
 }
 
 type Result struct {
-	Value string
-	Err   error
+	Answer string
+	Err    error
 }
 
-func (q *Queue) enqueue(channel chan Result) {
+func (q *Queue) enqueue(descriptionRequest DescriptionRequest) {
 	println(q.list)
-	q.list = append(q.list, channel)
+	q.list = append(q.list, descriptionRequest)
 	println(q.list)
 	println(len(q.list))
 }
 
-func (q *Queue) dequeue() chan Result {
-	channel := q.list[0]
+func (q *Queue) dequeue() DescriptionRequest {
+	descriptionRequest := q.list[0]
 	q.list = q.list[1:]
-	return channel
+	return descriptionRequest
 }
 
 func (q *Queue) isEmpty() bool {

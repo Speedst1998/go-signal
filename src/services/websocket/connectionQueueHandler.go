@@ -15,13 +15,13 @@ type ConnectionQueueHandler struct {
 }
 
 func MakeConnectionQueueHandler(connection *websocket.Conn, mediaServerName string) ConnectionQueueHandler {
-	list := make([]chan Result, 0)
+	list := make([]DescriptionRequest, 0)
 	return ConnectionQueueHandler{Queue{list}, connection, &sync.Mutex{}, mediaServerName}
 }
 
-func (this ConnectionQueueHandler) Enqueue(channel chan Result) {
+func (this ConnectionQueueHandler) Enqueue(channel chan Result, desc string) {
 	this.mutex.Lock()
-	this.q.enqueue(channel)
+	this.q.enqueue(DescriptionRequest{channel, desc})
 	println(this.q.size())
 	println(this.q.list)
 	if this.q.size() == 1 {
@@ -35,13 +35,13 @@ func (this ConnectionQueueHandler) consume() {
 	println("inside consume")
 	for this.q.isNotEmpty() {
 		this.mutex.Lock()
-		channel := this.q.dequeue()
+		descriptionRequest := this.q.dequeue()
+		channel := descriptionRequest.ResultChannel
+		description := descriptionRequest.Description
 		println("Reading from channel")
-		result := <-channel
-		description := result.Value
 		answer, err := exchangeDescription(description, this.connection)
 		println("Returning result to channel")
-		channel <- Result{Value: answer, Err: err}
+		channel <- Result{Answer: answer, Err: err}
 		this.mutex.Unlock()
 	}
 }
