@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"encoding/json"
 	"fmt"
 	"sync"
 
@@ -12,6 +13,11 @@ type ConnectionQueueHandler struct {
 	connection      *websocket.Conn
 	mutex           *sync.Mutex
 	mediaServerName string
+}
+
+type Message struct {
+	Type string `json:"type"`
+	Description string `json:"description"`
 }
 
 func MakeConnectionQueueHandler(connection *websocket.Conn, mediaServerName string) ConnectionQueueHandler {
@@ -49,7 +55,9 @@ func (this ConnectionQueueHandler) consume() {
 func exchangeDescription(description string, connection *websocket.Conn) (string, error) {
 	println("Exchanging Description")
 
-	err := connection.WriteMessage(websocket.TextMessage, []byte(description))
+	offerMessage := Message{Type: "offer", Description: description}
+	jsonOffer, err := json.Marshal(offerMessage)
+	err = connection.WriteMessage(websocket.TextMessage, []byte(jsonOffer))
 	if err != nil {
 		println("WHATIS THE ERROR")
 		println(err)
